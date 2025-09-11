@@ -1,0 +1,35 @@
+- name: Install Jenkins on ubuntu 
+  hosts: ubuntu 
+  become: true 
+  tasks:
+    - name: Update apt repo 
+      ansible.builtin.apt: 
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 3600
+    - name: Install Java 
+      ansible.builtin.apt:
+        pkg: 
+        - openjdk-21-jre
+        - fontconfig
+    - name: Add GPG key 
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+        dest: /etc/apt/keyrings/jenkins-keyring.asc
+    - name: Install jenkins from package repository 
+      ansible.builtin.apt_repository:
+        repo:  deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/
+        filename: /etc/apt/sources.list.d/jenkins.list
+    - name: Update Repo cache 
+      ansible.builtin.apt: 
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 3600
+    - name: Install Jenkins 
+      ansible.builtin.apt:
+        name: jenkins
+    - name: Start jenkins 
+      ansible.builtin.systemd_service:
+        state: started
+        name: jenkins
+

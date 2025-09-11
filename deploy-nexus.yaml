@@ -123,7 +123,7 @@
   become_user: nexus 
   tasks:
   - name: Run Nexus 
-    ansible.builtin.command: /opt/nexus/bin/nexus status
+    ansible.builtin.command: /opt/nexus/bin/nexus start
     register: nexus_status
     failed_when: false
     changed_when: false 

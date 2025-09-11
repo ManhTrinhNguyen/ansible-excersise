@@ -9,6 +9,29 @@ version '1.0-SNAPSHOT'
 
 sourceCompatibility = 17
 
+// apply plugin: 'maven-publish'
+
+// publishing {
+// publications {
+//     mavenJava(MavenPublication) {
+//         artifact("build/libs/my-app-$version" + ".jar") {
+//             extension 'jar'
+//         }
+//     }
+// }
+// repositories {
+//     maven {
+//         name 'nexus'
+//         url 'http://54.177.114.245:8081/repository/maven-snapshots/' // Adjust URL and port
+//         allowInsecureProtocol = true
+//         credentials {
+//             username = findProperty('repoUser')?.toString() ?: System.getenv('NEXUS_USER')
+//             password = findProperty('repoPassword')?.toString() ?: System.getenv('NEXUS_PASSWORD')
+//         } 
+//     }
+// }
+// }
+
 repositories {
     mavenCentral()
     maven { url 'https://repo.spring.io/milestone' }
