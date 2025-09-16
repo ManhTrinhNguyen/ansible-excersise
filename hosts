@@ -2,7 +2,7 @@
 54.67.53.144
 
 [ec2]
-54.153.102.162
+18.144.60.81
 
 [ubuntu:vars]
 ansible_ssh_private_key_file=../../../.ssh/terraform.pem
