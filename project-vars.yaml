@@ -4,3 +4,4 @@ artifact_name: my-app
 artifact_version: 1.0-SNAPSHOT
 nexus_user: tim
 nexus_password: Manhtrinh511998!
+host_name: ec2

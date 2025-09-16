@@ -1,0 +1,10 @@
+---
+- name: Install Jenkins
+  hosts: "{{host_name}}"
+  vars_files:
+    project-vars.yaml
+  become: true
+  tasks:
+    - name: Install Jenkins on ubuntu or amazon_linux 
+      ansible.builtin.include_tasks: "install-jenkins-on-{{host_name}}.yaml"
+      when: host_name is defined 
