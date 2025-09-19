@@ -1,0 +1,17 @@
+- name: Push to Nexus Repo
+  hosts: localhost
+  gather_facts: False
+  vars_files:
+    project-vars.yaml
+  tasks:
+  - name: Push jar artifact to Nexus repo 
+    ansible.builtin.uri:
+      url: "{{ nexus_url }}/repository/maven-snapshots/com/my/{{ artifact_name }}/{{ artifact_version }}/{{ artifact_name }}-{{ artifact_version }}.jar"
+      method: PUT
+      force_basic_auth: true
+      src: build/libs/my-app-1.0-SNAPSHOT.jar
+      user: "{{ nexus_user }}"
+      password: "{{ nexus_password }}"
+      body_format: json 
+      status_code: 201
+        

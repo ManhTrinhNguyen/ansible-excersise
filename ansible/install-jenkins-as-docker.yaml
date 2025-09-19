@@ -1,0 +1,49 @@
+---
+- name: Install docker on Amazon Linux 
+  hosts: ec2 
+  become: true 
+  tasks:
+  - name: Upgrade all packages 
+    ansible.builtin.dnf:
+      name: "*"
+      state: latest 
+  - name: Install docker, net-tools 
+    ansible.builtin.dnf:
+      name: 
+        - net-tools
+        - docker
+      state: present
+  - name: Start docker 
+    ansible.builtin.systemd_service:
+      state: started
+      name: docker
+  - name: Add docker group to ec2-user 
+    ansible.builtin.user:
+      name: ec2-user 
+      groups: docker
+      append: yes
+  - name: Reconnect to server session
+    meta: reset_connection
+
+- name: Run Jenkins as Docker 
+  hosts: ec2
+  tasks:
+  - name: Run jenkins 
+    community.docker.docker_container:
+      name: jenkins
+      image: jenkins/jenkins:lts 
+      state: started
+      ports:
+      - 8080:8080
+      - 50000:50000
+      volumes:
+      - jenkins_home:/var/jenkins_home 
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      detach: true
+
+
+
+
+
+

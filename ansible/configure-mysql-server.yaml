@@ -1,0 +1,16 @@
+- name: Configure Mysql DB server 
+  hosts: tag_Name_mysql_server
+  become: true 
+  vars_files:
+    - vars/mysql-role-config.yaml
+  roles:
+    - {role: geerlingguy.mysql }
+  tasks:
+  - name: validate mysql service started
+    shell: ps aux | grep mysql 
+    register: mysql_status
+  - debug: msg="{{ mysql_status.stdout_lines }}"
+  
+        
+
+      

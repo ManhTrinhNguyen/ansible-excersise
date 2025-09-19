@@ -1,0 +1,101 @@
+---
+- name: Make sure acl (Access Control List) package available
+  hosts: ubuntu
+  become: yes
+  become_user: root
+  tasks:
+    - name: Install acl
+      ansible.builtin.apt:
+        name: acl 
+        state: present
+        update_cache: yes
+
+- name: Build Java Artifact
+  hosts: localhost
+  tasks:
+    - name: build java artifact 
+      ansible.builtin.command: "gradle clean build"
+
+- name: Make sure Java Install on the Remote Server 
+  hosts: ubuntu
+  become_user: root
+  become: True 
+  tasks: 
+    - name: Install java on remote server 
+      ansible.builtin.apt:
+        name: openjdk-17-jdk
+        update_cache: yes
+
+- name: Install net-tools
+  hosts: ubuntu
+  remote_user: ubuntu
+  become: True
+  tasks:
+    - name: Install net-tools 
+      ansible.builtin.apt:
+        name: net-tools
+        update_cache: yes
+
+- name : Create new User 
+  hosts: ubuntu
+  become_user: root
+  become: true 
+  vars_files:
+    project-vars.yaml
+  tasks:
+    - name: Create new User 
+      ansible.builtin.user:
+        name: "{{user_name}}"
+        create_home: yes
+        groups: sudo
+        append: yes
+    - name: Create ~/.ansible/tmp 
+      file:
+        path: /home/{{user_name}}/.ansible/tmp
+        state: directory
+        owner: "{{user_name}}"
+        group: "{{user_name}}"
+        mode: "0700"
+
+- name: Copy Artifact to Remote Server 
+  hosts: ubuntu 
+  become: True
+  become_user: "{{user_name}}"
+  vars_files:
+    project-vars.yaml
+  tasks:
+    - name: Copy artifiact to remote server
+      ansible.builtin.copy:
+        src: build/libs/build-tools-exercises-1.0-SNAPSHOT.jar
+        dest: /home/{{user_name}}/java-artifact.jar
+
+- name: Validate Java App 
+  hosts: ubuntu 
+  become: True 
+  become_user: "{{user_name}}"
+  vars_files:
+    project-vars.yaml
+  tasks:
+    - name: Validate java app with ps aux 
+      ansible.builtin.shell: "ps aux | grep java"
+      register: app_status
+    - debug: msg={{app_status.stdout_lines}}
+    - name: Validate java app with netstat 
+      ansible.builtin.shell: "netstat -ltpn"
+      register: app_status 
+    - debug: msg={{app_status.stdout_lines}}
+
+- name: Deploy Java 
+  hosts: ubuntu
+  become: True
+  become_user: "{{user_name}}"
+  vars_files:
+    project-vars.yaml
+  tasks:
+    - name: Deploy java 
+      ansible.builtin.command: "java -jar /home/{{user_name}}/java-artifact.jar"
+
+
+
+  
+

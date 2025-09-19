@@ -1,0 +1,144 @@
+- name: Install Java, net-tools and ACL 
+  hosts: ubuntu
+  become: yes
+  become_user: root 
+  tasks:
+  - name: install acl and java 
+    ansible.builtin.apt:
+      pkg:
+      - acl
+      - openjdk-17-jdk
+      - net-tools
+      update_cache: yes
+
+- name: Create Nexus user 
+  hosts: ubuntu
+  become: yes
+  tasks:
+  - name: Create Nexus group 
+    ansible.builtin.group:
+      name: nexus
+      state: present 
+  - name: Create nexus User 
+    ansible.builtin.user:
+      name: nexus
+      group: nexus 
+
+- name: Find nexus and sonatype-work in /opt/
+  hosts: ubuntu
+  become: yes
+  tasks:
+  - name: Find nexus in /opt/
+    ansible.builtin.stat:
+     path: /opt/nexus 
+    register: find_nexus_dir
+  - debug: msg={{find_nexus_dir.stat.exists}}
+  - name: Find sonatype-work dir 
+    ansible.builtin.stat:
+      path: /opt/sonatype-work
+    register: find_sonatype_dir
+  - debug: msg={{find_sonatype_dir.stat.exists}}
+
+- name: Download Nexus tarfile
+  hosts: ubuntu 
+  tasks:
+  - name: Download Nexus 
+    ansible.builtin.get_url:
+      url: https://download.sonatype.com/nexus/3/nexus-3.83.2-01-linux-x86_64.tar.gz
+      dest: /home/ubuntu/
+    when: not find_nexus_dir.stat.exists or not find_sonatype_dir.stat.exists
+
+- name: Unarchive Nexus tar
+  hosts: ubuntu
+  become: yes
+  tasks:
+  - name: Unarchive Nexus tar
+    ansible.builtin.unarchive:
+      src: /home/ubuntu/nexus-3.83.2-01-linux-x86_64.tar.gz
+      dest: /home/ubuntu/
+      remote_src: yes
+    when: not find_nexus_dir.stat.exists or not find_sonatype_dir.stat.exists
+  
+  - name: Rename nexus file and move to /opt/
+    ansible.builtin.command: mv /home/ubuntu/nexus-3.83.2-01 /opt/nexus
+    when: not find_nexus_dir.stat.exists or not find_sonatype_dir.stat.exists
+
+  - name: Copy sonatype file to /opt/
+    ansible.builtin.command: mv /home/ubuntu/sonatype-work /opt/
+    when: not find_nexus_dir.stat.exists or not find_sonatype_dir.stat.exists
+
+  - name: Delete nexus dir on /home/ubuntu/
+    ansible.builtin.file:
+     path: /home/ubuntu/nexus-3.83.2-01
+     state: absent
+    when: not find_nexus_dir.stat.exists or not find_sonatype_dir.stat.exists
+
+  - name: Delete sonatype dir on /home/ubuntu/
+    ansible.builtin.file:
+     path: /home/ubuntu/sonatype-work
+     state: absent
+    when: not find_nexus_dir.stat.exists or not find_sonatype_dir.stat.exists
+
+  - name: Delete nexus tar on /home/ubuntu/
+    ansible.builtin.file:
+     path: /home/ubuntu/nexus-3.83.2-01-linux-x86_64.tar.gz
+     state: absent
+    when: not find_nexus_dir.stat.exists or not find_sonatype_dir.stat.exists
+
+- name: Change sonatype and nexus file owner to Nexus user 
+  hosts: ubuntu 
+  become: yes
+  tasks:
+  - name: change sonatype-work dir owner to Nexus user 
+    ansible.builtin.file:
+      path: /opt/sonatype-work
+      owner: nexus
+      group: nexus
+      recurse: yes 
+      state: directory
+  - name: Change nexus dir ownder to Nexus user 
+    ansible.builtin.file:
+      path: /opt/nexus
+      owner: nexus
+      group: nexus
+      recurse: yes 
+      state: directory
+
+- name: Verify that Nexus working 
+  hosts: ubuntu 
+  tasks:
+  - name: Check nexus process 
+    ansible.builtin.shell: ps aux | grep nexus 
+    register: nexus_process
+  - debug: msg={{nexus_process.stdout_lines[0]}}
+
+  - name: Check Nexus network 
+    ansible.builtin.command: netstat -ltpn
+    register: nexus_network
+  - debug: msg={{nexus_network.stdout_lines}}
+
+- name: Run Nexus 
+  hosts: ubuntu 
+  become: yes
+  become_user: nexus 
+  tasks:
+  - name: Run Nexus 
+    ansible.builtin.command: /opt/nexus/bin/nexus start
+    register: nexus_status
+    failed_when: false
+    changed_when: false 
+  - debug:
+      msg: msg={{nexus_status.stdout}}
+
+
+
+
+
+
+
+    
+
+
+
+    
+
