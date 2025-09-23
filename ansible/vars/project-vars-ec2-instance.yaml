@@ -1,9 +1,9 @@
-name: "ansible-server"
+name: "mysql-server"
 key_name: "terraform"
 image_id_amazon_linux: ami-0d9e15a8edf01ec21
 image_id_ubuntu: ami-00271c85bf8a52b84
 instance_type: t2.medium
 security_group: sg-02e291e601b848d2c
-assign_public_ip: true
+assign_public_ip: false
 subnet_id_public: subnet-0276a7b58071106c8 
 subnet_id_private: subnet-0a5c284fecce37561

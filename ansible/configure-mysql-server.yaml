@@ -4,12 +4,14 @@
   vars_files:
     - vars/mysql-role-config.yaml
   roles:
-    - {role: geerlingguy.mysql }
+    - { role: geerlingguy.mysql }
   tasks:
   - name: validate mysql service started
     shell: ps aux | grep mysql 
     register: mysql_status
   - debug: msg="{{ mysql_status.stdout_lines }}"
+
+## Deploy Java app
   
         
 

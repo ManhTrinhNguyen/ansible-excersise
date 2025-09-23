@@ -10,7 +10,7 @@
       image_id: "{{image_id_ubuntu}}"
       instance_type: "{{instance_type}}"
       security_group: "{{security_group}}"
-      subnet_id: "{{subnet_id_public}}"
+      subnet_id: "{{subnet_id_private}}"
       network_interfaces:
         - assign_public_ip: "{{assign_public_ip}}"
     register: ec2_status

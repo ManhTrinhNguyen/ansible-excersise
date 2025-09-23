@@ -1,7 +1,8 @@
-user_name: kelly
+
 nexus_url: http://54.177.114.245:8081
 artifact_name: my-app
 artifact_version: 1.0-SNAPSHOT
 nexus_user: tim
 nexus_password: Manhtrinh511998!
 host_name: ec2
+

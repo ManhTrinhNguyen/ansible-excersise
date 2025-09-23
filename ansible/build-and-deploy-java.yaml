@@ -1,6 +1,6 @@
 ---
 - name: Make sure acl (Access Control List) package available
-  hosts: ubuntu
+  hosts: tag_Name_java_server
   become: yes
   become_user: root
   tasks:
@@ -12,12 +12,16 @@
 
 - name: Build Java Artifact
   hosts: localhost
+  vars_files:
+    project-vars-java-app.yaml
   tasks:
     - name: build java artifact 
       ansible.builtin.command: "gradle clean build"
+      args:
+        chdir: ..
 
 - name: Make sure Java Install on the Remote Server 
-  hosts: ubuntu
+  hosts: tag_Name_java_server
   become_user: root
   become: True 
   tasks: 
@@ -27,7 +31,7 @@
         update_cache: yes
 
 - name: Install net-tools
-  hosts: ubuntu
+  hosts: tag_Name_java_server
   remote_user: ubuntu
   become: True
   tasks:
@@ -37,11 +41,11 @@
         update_cache: yes
 
 - name : Create new User 
-  hosts: ubuntu
+  hosts: tag_Name_java_server
   become_user: root
   become: true 
   vars_files:
-    project-vars.yaml
+    project-vars-java-app.yaml
   tasks:
     - name: Create new User 
       ansible.builtin.user:
@@ -58,23 +62,40 @@
         mode: "0700"
 
 - name: Copy Artifact to Remote Server 
-  hosts: ubuntu 
+  hosts: tag_Name_java_server 
   become: True
   become_user: "{{user_name}}"
   vars_files:
-    project-vars.yaml
+    project-vars-java-app.yaml
   tasks:
     - name: Copy artifiact to remote server
       ansible.builtin.copy:
-        src: build/libs/build-tools-exercises-1.0-SNAPSHOT.jar
+        src: ../build/libs/my-app-1.0-SNAPSHOT.jar
         dest: /home/{{user_name}}/java-artifact.jar
+      
+- name: Deploy Java 
+  hosts: tag_Name_java_server
+  become: True
+  become_user: "{{user_name}}"
+  vars_files:
+    project-vars-java-app.yaml
+  tasks:
+    - name: Deploy java 
+      ansible.builtin.command: java -jar /home/{{user_name}}/java-artifact.jar &
+      environment: 
+        DB_USER: "{{DB_USER}}"
+        DB_PWD: "{{DB_PWD}}"
+        DB_SERVER: "{{DB_SERVER}}"
+        DB_NAME: "{{DB_NAME}}"
+      async: 1000
+      poll: 0
 
 - name: Validate Java App 
-  hosts: ubuntu 
+  hosts: tag_Name_java_server 
   become: True 
   become_user: "{{user_name}}"
   vars_files:
-    project-vars.yaml
+    project-vars-java-app.yaml
   tasks:
     - name: Validate java app with ps aux 
       ansible.builtin.shell: "ps aux | grep java"
@@ -84,18 +105,5 @@
       ansible.builtin.shell: "netstat -ltpn"
       register: app_status 
     - debug: msg={{app_status.stdout_lines}}
-
-- name: Deploy Java 
-  hosts: ubuntu
-  become: True
-  become_user: "{{user_name}}"
-  vars_files:
-    project-vars.yaml
-  tasks:
-    - name: Deploy java 
-      ansible.builtin.command: "java -jar /home/{{user_name}}/java-artifact.jar"
-
-
-
   
 

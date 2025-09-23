@@ -1,0 +1,5 @@
+user_name: java
+DB_USER: tim 
+DB_PWD: password
+DB_SERVER: 10.0.132.27
+DB_NAME: my-app-db
