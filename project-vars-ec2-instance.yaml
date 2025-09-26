@@ -1,6 +1,0 @@
-name: "ansible-server"
-key_name: "terraform"
-image_id: ami-0d9e15a8edf01ec21
-instance_type: t2.medium
-security_group: sg-02aee40a19e0b5b25
-assign_public_ip: true 

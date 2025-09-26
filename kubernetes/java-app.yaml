@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: java-app
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: java-app
+  template:
+    metadata:
+      labels:
+        app: java-app
+    spec:
+      imagePullSecrets:
+      - name: docker-authenticate-secret
+      containers:
+      - name: java-app 
+        image: nguyenmanhtrinh/demo-app:java-ansible 
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secret 
+              key: DB_USER
+        - name: DB_PWD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: DB_PWD 
+        - name: DB_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: java-configmap
+              key: DB_SERVER
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: db-secret 
+              key: DB_NAME
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: java-svc
+spec:
+  selector:
+    app: java-app
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  
+  
+

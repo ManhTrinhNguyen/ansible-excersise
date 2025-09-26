@@ -1,0 +1,54 @@
+---
+- name: Install Ingress Controller as Helm 
+  hosts: localhost
+  tasks: 
+  - name: Install Ingress Controller 
+    kubernetes.core.helm:
+      name: ingress-nginx 
+      chart_ref: ingress-nginx/ingress-nginx
+      release_namespace: ingress-nginx
+      create_namespace: true
+      values_files:
+      - vars/nginx-values.yaml
+
+- name: Deploy Mysql with as Helm 
+  hosts: localhost 
+  tasks:
+  - name: Deploy Mysql 
+    kubernetes.core.helm:
+      name: mysql
+      chart_ref: oci://registry-1.docker.io/bitnamicharts/mysql
+      release_namespace: default 
+      values_files:
+      - vars/mysql-values.yaml
+
+- name: Deploy Java Applications on Kubernetes
+  hosts: localhost
+  tasks:
+  - name: Deploy ConfigMap
+    kubernetes.core.k8s:
+      state: present 
+      namespace: default
+      src: ../kubernetes/configMap.yaml
+  - name: Deploy Secret
+    kubernetes.core.k8s:
+      state: present 
+      namespace: default
+      src: ../kubernetes/secret.yaml
+  - name: Deploy Ingress 
+    kubernetes.core.k8s:
+      state: present
+      namespace: default 
+      src: ../kubernetes/ingress.yaml
+  - name: Deploy Java app 
+    kubernetes.core.k8s:
+      state: present
+      namespace: default
+      src: ../kubernetes/java-app.yaml
+
+
+
+
+
+
+  

@@ -1,0 +1,22 @@
+architecture: "replication"
+
+auth:
+  username: "tim"
+  rootPassword: "rootpassword"
+  password: "password"
+  database: "my_database"
+
+primary:
+  persistence:
+    enabled: true
+    storageClass: gp2               
+    accessModes: ["ReadWriteOnce"]
+    size: 20Gi
+
+secondary:
+  replicaCount: 2
+  persistence:
+    enabled: true
+    storageClass: gp2
+    accessModes: ["ReadWriteOnce"]
+    size: 20Gi

@@ -1,6 +1,0 @@
----
-plugin: aws_ec2
-regions:
-  - us-west-1
-filters: 
-  tag:Name: ansible*

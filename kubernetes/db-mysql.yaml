@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: db 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db 
+  template:
+    metadata:
+      name: db
+      labels:
+        app: db 
+    spec:
+      containers:
+      - name: db 
+        image: mysql 
+        ports:
+        - containerPort: 3306 
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: DB_ROOT_PWD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: DB_NAME
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: DB_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef: 
+              name: db-secret
+              key: DB_PWD
+        
+---
+apiVersion: v1
+kind: Service 
+metadata:
+  name: db-svc 
+spec: 
+  selector:
+    app: db
+  ports:
+  - port: 3306
+    protocol: TCP 
+    targetPort: 3306
